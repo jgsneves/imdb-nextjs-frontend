@@ -1,4 +1,13 @@
-import { Box, Button, Flex, Input, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormErrorMessage,
+  Input,
+  Text,
+  useToast,
+} from "@chakra-ui/react";
 import { BrandLogo } from "../BrandLogo";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store";
@@ -10,6 +19,10 @@ import { jwtDecode } from "jwt-decode";
 import { AuthService, LoginRequestBody } from "../../services/auth-service";
 import { useRouter } from "next/router";
 import { AuthCookieService } from "../../services/auth-cookie-service";
+import { Formik, Field, Form, FormikHelpers } from "formik";
+import { isValidEmail } from "@brazilian-utils/brazilian-utils";
+import { isValidPassword } from "../../utils/password-util";
+import { findMessage } from "../../utils/request-error-handler";
 
 export interface JwtPayload {
   email: string;
@@ -18,15 +31,15 @@ export interface JwtPayload {
 }
 
 export const AuthHeader = () => {
-  const [formData, setFormData] = useState<LoginRequestBody>({
+  const initialValues: LoginRequestBody = {
     email: "",
     password: "",
-  });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  };
 
   const { userEmail } = useSelector((state: RootState) => state.auth);
 
   const dispatch = useDispatch();
+  const toast = useToast();
   const router = useRouter();
 
   const handleBrandOnClick = () => {
@@ -38,39 +51,66 @@ export const AuthHeader = () => {
     AuthCookieService.deleteAccessTokenCookie();
   };
 
-  const handleInputOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, id } = event.target;
-    setFormData((state) => ({ ...state, [id]: value }));
+  const validateEmailInput = (value: string) => {
+    let error;
+    if (!isValidEmail(value)) {
+      error = "Forneça um endereço de e-mail válido";
+    }
+    return error;
   };
 
-  const handleLoginButtonOnClick = () => {
-    setIsLoading(true);
+  const validatePasswordInput = (value: string) => {
+    let error;
 
+    if (value.length === 0) {
+      error = "Forneça a sua senha";
+    }
+
+    return error;
+  };
+
+  const handleLoginButtonOnClick = (
+    values: LoginRequestBody,
+    helpers: FormikHelpers<LoginRequestBody>
+  ) => {
     AuthService.login({
-      email: formData.email,
-      password: formData.password,
+      email: values.email,
+      password: values.password,
     })
-      .then((result) => {
-        const { access_token, expires_in } = result.data;
-        const { email, role, sub } = jwtDecode<JwtPayload>(access_token);
+      .then(
+        (result) => {
+          const { access_token, expires_in } = result.data;
+          const { email, role, sub } = jwtDecode<JwtPayload>(access_token);
 
-        AuthCookieService.createAccessTokenCookie(access_token, expires_in);
+          AuthCookieService.createAccessTokenCookie(access_token, expires_in);
 
-        dispatch(
-          login({
-            accessToken: access_token,
-            email,
-            expiringDate:
-              DateUtil.addDaysToCurrentDate(expires_in).toISOString(),
-            role,
-            id: sub,
-          })
-        );
-      })
+          dispatch(
+            login({
+              accessToken: access_token,
+              email,
+              expiringDate:
+                DateUtil.addDaysToCurrentDate(expires_in).toISOString(),
+              role,
+              id: sub,
+            })
+          );
+        },
+        (reason) => {
+          const message = findMessage(reason);
+
+          toast({
+            title: "Não foi possível fazer login.",
+            description: `${message ?? "Erro inesperado."}`,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        }
+      )
       .catch((error) => {
         ErrorLogger.log(error);
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => helpers.setSubmitting(false));
   };
 
   return (
@@ -119,34 +159,60 @@ export const AuthHeader = () => {
             gap={3}
             alignItems="center"
           >
-            <Input
-              bgColor="white"
-              width={250}
-              placeholder="e-mail"
-              id="email"
-              isDisabled={isLoading}
-              onChange={handleInputOnChange}
-              size="sm"
-            />
-            <Input
-              bgColor="white"
-              width={250}
-              type="password"
-              placeholder="senha"
-              id="password"
-              isDisabled={isLoading}
-              onChange={handleInputOnChange}
-              size="sm"
-            />
-            <Button
-              maxWidth={250}
-              colorScheme="yellow"
-              onClick={handleLoginButtonOnClick}
-              isLoading={isLoading}
-              size="sm"
+            <Formik
+              initialValues={initialValues}
+              onSubmit={(values, helpers) => {
+                handleLoginButtonOnClick(values, helpers);
+              }}
             >
-              entrar
-            </Button>
+              {({ errors, touched, isSubmitting }) => (
+                <Form>
+                  <Flex alignItems="center" gap={2}>
+                    <FormControl isInvalid={!!errors.email && touched.email}>
+                      <Field
+                        as={Input}
+                        type="email"
+                        bgColor="white"
+                        width={250}
+                        placeholder="e-mail"
+                        id="email"
+                        name="email"
+                        isDisabled={isSubmitting}
+                        size="sm"
+                        validate={validateEmailInput}
+                      />
+                      <FormErrorMessage>{errors.email}</FormErrorMessage>
+                    </FormControl>
+                    <FormControl
+                      isInvalid={!!errors.password && touched.password}
+                    >
+                      <Field
+                        as={Input}
+                        bgColor="white"
+                        width={250}
+                        type="password"
+                        placeholder="senha"
+                        id="password"
+                        name="password"
+                        isDisabled={isSubmitting}
+                        size="sm"
+                        validate={validatePasswordInput}
+                      />
+                      <FormErrorMessage>{errors.password}</FormErrorMessage>
+                    </FormControl>
+                    <Button
+                      maxWidth={250}
+                      colorScheme="yellow"
+                      isLoading={isSubmitting}
+                      size="sm"
+                      type="submit"
+                    >
+                      entrar
+                    </Button>
+                  </Flex>
+                </Form>
+              )}
+            </Formik>
           </Flex>
         )}
       </Flex>

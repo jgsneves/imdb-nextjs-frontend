@@ -1,48 +1,109 @@
-import { Flex, Button, Card, Input, Text } from "@chakra-ui/react";
-import { useState } from "react";
+import {
+  Flex,
+  Button,
+  Card,
+  Input,
+  Text,
+  FormLabel,
+  FormControl,
+  FormErrorMessage,
+  useToast,
+} from "@chakra-ui/react";
 import {
   CreateMovieRequestBody,
   MovieService,
 } from "../../../../services/movie-service";
 import { ErrorLogger } from "../../../../services/error-logger";
 import { mutate } from "swr";
+import { Field, Form, Formik, FormikHelpers } from "formik";
+import { findMessage } from "../../../../utils/request-error-handler";
 
 interface FormData extends Omit<CreateMovieRequestBody, "actors"> {
   actors: string;
 }
 
 export const CreateMovie = () => {
-  const initialFormData = {
+  const toast = useToast();
+
+  const initialFormData: FormData = {
     actors: "",
     directorName: "",
     genre: "",
     name: "",
     releaseDate: "",
   };
-  const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleInputOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = event.target;
-    setFormData((state) => ({ ...state, [id]: value }));
+  const validateNameInput = (value: string) => {
+    let error;
+    if (value.length === 0) {
+      error = "Forneça um nome";
+    }
+    return error;
   };
 
-  const handleCreateOnClick = () => {
-    setIsLoading(true);
-    const actorsArray = formData.actors.split(",");
-    const dateIsoString = new Date(formData.releaseDate).toISOString();
+  const validateReleaseDateInput = (value: string) => {
+    let error;
+    if (value.length === 0) {
+      error = "Forneça a data de lançamento";
+    }
+    return error;
+  };
+
+  const validateGenreInput = (value: string) => {
+    let error;
+    if (value.length === 0) {
+      error = "Forneça um gênero do filme";
+    }
+    return error;
+  };
+
+  const validateDirectorNameInput = (value: string) => {
+    let error;
+    if (value.length === 0) {
+      error = "Forneça um nome de diretor";
+    }
+    return error;
+  };
+
+  const validateActorsInput = (value: string) => {
+    let error;
+    if (value.length === 0) {
+      error = "Forneça os atores do filme";
+    }
+    return error;
+  };
+
+  const handleCreateOnClick = (
+    values: FormData,
+    helpers: FormikHelpers<FormData>
+  ) => {
+    const actorsArray = values.actors.split(",");
+    const dateIsoString = new Date(values.releaseDate).toISOString();
 
     MovieService.createMovie({
-      ...formData,
+      ...values,
       actors: actorsArray,
       releaseDate: dateIsoString,
     })
-      .then(() => {
-        setFormData(initialFormData);
-        mutate(`${MovieService.BASE_URL}/movies?`);
-      })
+      .then(
+        () => {
+          helpers.resetForm();
+          mutate(`${MovieService.BASE_URL}/movies?`);
+        },
+        (reason) => {
+          const message = findMessage(reason);
+
+          toast({
+            title: "Não foi possível criar um novo filme.",
+            description: `${message ?? "Erro inesperado."}`,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        }
+      )
       .catch((error) => ErrorLogger.log(error))
-      .finally(() => setIsLoading(false));
+      .finally(() => helpers.setSubmitting(false));
   };
 
   return (
@@ -51,59 +112,98 @@ export const CreateMovie = () => {
         <Text as="b" display="block">
           Cadastrar um novo filme
         </Text>
-        <label>
-          Nome:
-          <Input
-            id="name"
-            disabled={isLoading}
-            onChange={handleInputOnChange}
-            value={formData.name}
-          />
-        </label>
-        <label>
-          Data de lançamento:
-          <Input
-            id="releaseDate"
-            type="date"
-            disabled={isLoading}
-            onChange={handleInputOnChange}
-            value={formData.releaseDate}
-          />
-        </label>
-        <label>
-          Gênero:
-          <Input
-            id="genre"
-            disabled={isLoading}
-            onChange={handleInputOnChange}
-            value={formData.genre}
-          />
-        </label>
-        <label>
-          Nome do Diretor:
-          <Input
-            id="directorName"
-            disabled={isLoading}
-            onChange={handleInputOnChange}
-            value={formData.directorName}
-          />
-        </label>
-        <label>
-          Atores (separar por vírgulas):
-          <Input
-            id="actors"
-            disabled={isLoading}
-            onChange={handleInputOnChange}
-            value={formData.actors}
-          />
-        </label>
-        <Button
-          colorScheme="yellow"
-          disabled={isLoading}
-          onClick={handleCreateOnClick}
+        <Formik
+          initialValues={initialFormData}
+          onSubmit={(values, helpers) => handleCreateOnClick(values, helpers)}
         >
-          salvar
-        </Button>
+          {({ errors, touched, isSubmitting, values }) => (
+            <Form>
+              <FormControl isInvalid={!!errors.name && touched.name}>
+                <FormLabel>
+                  Nome:
+                  <Field
+                    as={Input}
+                    id="name"
+                    name="name"
+                    disabled={isSubmitting}
+                    validate={validateNameInput}
+                  />
+                </FormLabel>
+                <FormErrorMessage>{errors.name}</FormErrorMessage>
+              </FormControl>
+
+              <FormControl
+                isInvalid={!!errors.releaseDate && touched.releaseDate}
+              >
+                <FormLabel>
+                  Data de lançamento:
+                  <Field
+                    as={Input}
+                    id="releaseDate"
+                    name="releaseDate"
+                    type="date"
+                    disabled={isSubmitting}
+                    validate={validateReleaseDateInput}
+                  />
+                </FormLabel>
+                <FormErrorMessage>{errors.releaseDate}</FormErrorMessage>
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.genre && touched.genre}>
+                <FormLabel>
+                  Gênero:
+                  <Field
+                    as={Input}
+                    id="genre"
+                    name="genre"
+                    disabled={isSubmitting}
+                    validate={validateGenreInput}
+                  />
+                </FormLabel>
+                <FormErrorMessage>{errors.genre}</FormErrorMessage>
+              </FormControl>
+
+              <FormControl
+                isInvalid={!!errors.directorName && touched.directorName}
+              >
+                <FormLabel>
+                  Nome do Diretor:
+                  <Field
+                    as={Input}
+                    id="directorName"
+                    name="directorName"
+                    disabled={isSubmitting}
+                    validate={validateDirectorNameInput}
+                  />
+                </FormLabel>
+                <FormErrorMessage>{errors.directorName}</FormErrorMessage>
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.actors && touched.actors}>
+                <FormLabel>
+                  Atores (separar por vírgulas):
+                  <Field
+                    as={Input}
+                    id="actors"
+                    name="actors"
+                    disabled={isSubmitting}
+                    validate={validateActorsInput}
+                  />
+                </FormLabel>
+                <FormErrorMessage>{errors.actors}</FormErrorMessage>
+              </FormControl>
+
+              <Button
+                colorScheme="yellow"
+                type="submit"
+                width="100%"
+                disabled={isSubmitting}
+              >
+                salvar
+              </Button>
+            </Form>
+          )}
+        </Formik>
       </Flex>
     </Card>
   );

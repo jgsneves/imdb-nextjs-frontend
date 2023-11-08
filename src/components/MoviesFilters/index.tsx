@@ -4,6 +4,7 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
+  Button,
   Flex,
   Input,
   Text,
@@ -25,6 +26,14 @@ export const MoviesFilters = ({
     setFilterInputValues((state) => ({ ...state, [id]: value }));
   };
 
+  const handleClearOnClick = () =>
+    setFilterInputValues({
+      actors: "",
+      directorName: "",
+      genre: "",
+      name: "",
+    });
+
   return (
     <Accordion allowToggle>
       <AccordionItem>
@@ -41,7 +50,7 @@ export const MoviesFilters = ({
           <AccordionIcon />
         </AccordionButton>
         <AccordionPanel>
-          <Flex flexDirection="column" gap={2}>
+          <Flex flexDirection="column" gap={2} width={["100%", "50%"]}>
             <Text as="i" display="block">
               Filtre filmes por:
             </Text>
@@ -77,6 +86,9 @@ export const MoviesFilters = ({
                 value={filterInputValues.actors}
               />
             </label>
+            <Button colorScheme="yellow" onClick={handleClearOnClick}>
+              limpar filtros
+            </Button>
           </Flex>
         </AccordionPanel>
       </AccordionItem>

@@ -8,8 +8,23 @@ import {
   Input,
   Text,
 } from "@chakra-ui/react";
+import { Dispatch, SetStateAction } from "react";
+import { FilterInputValues } from "../../pages";
 
-export const MoviesFilters = () => {
+interface Props {
+  filterInputValues: FilterInputValues;
+  setFilterInputValues: Dispatch<SetStateAction<FilterInputValues>>;
+}
+
+export const MoviesFilters = ({
+  filterInputValues,
+  setFilterInputValues,
+}: Props) => {
+  const handleInputOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = event.target;
+    setFilterInputValues((state) => ({ ...state, [id]: value }));
+  };
+
   return (
     <Accordion allowToggle>
       <AccordionItem>
@@ -32,19 +47,35 @@ export const MoviesFilters = () => {
             </Text>
             <label>
               Nome
-              <Input />
+              <Input
+                id="name"
+                onChange={handleInputOnChange}
+                value={filterInputValues.name}
+              />
             </label>
             <label>
               Nome do Diretor
-              <Input />
+              <Input
+                id="directorName"
+                onChange={handleInputOnChange}
+                value={filterInputValues.directorName}
+              />
             </label>
             <label>
               Gênero
-              <Input />
+              <Input
+                id="genre"
+                onChange={handleInputOnChange}
+                value={filterInputValues.genre}
+              />
             </label>
             <label>
               Nome de Atores (separar por vírgula)
-              <Input />
+              <Input
+                id="actors"
+                onChange={handleInputOnChange}
+                value={filterInputValues.actors}
+              />
             </label>
           </Flex>
         </AccordionPanel>

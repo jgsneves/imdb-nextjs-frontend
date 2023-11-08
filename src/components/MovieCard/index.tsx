@@ -8,8 +8,31 @@ import {
   Text,
   Image,
 } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 
-export const MovieCard = () => {
+interface Props {
+  id: string;
+  name: string;
+  director: string;
+  genre: string;
+  actors: string[];
+}
+
+export const MovieCard = ({ id, name, director, genre, actors }: Props) => {
+  const reducedActors = actors.reduce((prev, current) => {
+    if (prev === "") {
+      return current;
+    }
+
+    return `${prev}, ${current}`;
+  }, "");
+
+  const router = useRouter();
+
+  const handleDetailsButtonOnClick = () => {
+    router.push(`/filmes/${id}`);
+  };
+
   return (
     <Card
       direction={{ base: "column", sm: "row" }}
@@ -25,15 +48,19 @@ export const MovieCard = () => {
 
       <Stack>
         <CardBody>
-          <Heading size="md">O poderoso chefão</Heading>
+          <Heading size="md">{name}</Heading>
 
-          <Text py="2">Diretor: Fulano de Tal</Text>
-          <Text py="2">Gênero: ação</Text>
-          <Text py="2">Atores: Fulano, Ciclano, etc</Text>
+          <Text py="2">Diretor: {director}</Text>
+          <Text py="2">Gênero: {genre}</Text>
+          <Text py="2">Atores: {reducedActors}</Text>
         </CardBody>
 
         <CardFooter>
-          <Button variant="solid" colorScheme="yellow">
+          <Button
+            variant="solid"
+            colorScheme="yellow"
+            onClick={handleDetailsButtonOnClick}
+          >
             ver detalhes
           </Button>
         </CardFooter>

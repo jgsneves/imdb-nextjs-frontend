@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  nest-api:
+  next-frontend:
     container_name: next-frontend
     build:
       context: .

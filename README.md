@@ -25,12 +25,9 @@ Primeiramente você deve clonar este repositório em sua máquina local. Possuin
 ```bash
 $ docker-compose up -d
 ```
-Este comando criará dois containers: um para o postegres e outro para a API. A api estará exposta no endereço `localhost:3000`.
+Este comando criará um container que buildará a aplicação NextJS em `localhost:3002`.
 
 ### Sem utilizar docker
-
-Você deve possuir um banco de dados `postgres` local (ou na nuvem) que possa receber a conexão do `PrismaORM` deste projeto. A recomendação é utilizar [docker](https://hub.docker.com/_/postgres) para encapsular a lógica do banco dentro de um container.
-
 Após clonar este repositório para seu ambiente local, deve instalar todas as bibliotecas através do seguinte comando:
 ```bash
 $ npm install
@@ -40,14 +37,14 @@ O arquivo `.env` na raiz do projeto já foi criado e deve ser utilizado em ambie
 ## Iniciando o APP
 Caso opte por utilizar `docker`, a aplicação já estará exposta com a criação dos containers. Caso contrário, deverá utilizar algum dos comandos abaixo para iniciar a aplicação em uma das portas de seu computador:
 ```bash
-# Após o build, localmente
-$ npm run start
+# Start com hot reload
+$ npm run dev
 
-# Com o Watch Mode
+# Start após o build
 $ npm run start:dev
 
-# Em produção
-$ npm run start:prod
+# Build da aplicação
+$ npm run build
 ```
 ## Para testar
 Importante ressaltar que o fim deste repositório é de apenas expor o conhecimento do programador-autor deste projeto. Com isso em mente, nem todos os testes unitários e de integração foram implementados. Porém, em um cenário real, o ideal é que todas as features sejam testadas através de testes de integração.
@@ -59,13 +56,13 @@ $ npm run test
 ## Tecnologias utilizadas
 
  1. [NextJS](https://nestjs.com/): um framework que utiliza ReactJS para renderizar a árvore do DOM, cuidando nativamente de quetões como rotas, performance com a utilização de estratégias como renderização em suspense (o JS é entregado para o cliente sob demanda), dentre outras funcionalidades.
- 2. [PrismaORM](https://www.prisma.io/): uma library para NodeJS que nos auxilia na conexão com um banco de dados, além da criação e utilização de queries e mutations, pensando sempre na segurança e escalabilidade da aplicação. Já vem com built-ins de segurança para prever SQL Injection, dentre outras funcionalidades.
- 3. [bcrypt](https://www.npmjs.com/package/bcrypt): biblioteca consolidada para a encriptação de caracteres, utilizada para encriptar senhas que serão salvas no Banco de Dados.
- 4. [Zod](https://zod.dev/): biblioteca criada para fazer validação e declaração de tipos, usando Typescript. Ela garante que a tipagem estática seja respeitada em tempo de execução (runtime).
- 5. [Typescript](https://www.typescriptlang.org/): super-set de javascript, uma linguagem de programação fortemente tipada que é construída sobre o Javascript, complementa a linguagem para introduzir tipagem estática, segurança no desenvolvimento e uma intellisense mais descritiva.
- 6. [Jest](https://jestjs.io/pt-BR/): framework de teste Javascript amplatamente utilizado no mercado.
- 7. [Postegres](https://www.postgresql.org/): banco de dados open-source com ótimas features built-in, como enum scalar, array scalar, suporte a JSON, etc.
- 8. [Docker](https://www.docker.com/): utilizar containers garante que o ambiente em que a aplicação é executada é isolado e facilmente replicado. Além disso, dá a possibilidade de executar a aplicação apenas se um container de banco de dados estiver ativo.
+ 2. [Redux](https://redux.js.org/): a library de gerenciamento de estado mais utilizada no ecossistema React. Com ela, podemos persistir dados globais na aplicação, podendo utilizá-la em suites de testes, server-side e client-side.
+ 3. [ReactJS](https://react.dev/): biblioteca consolidada na renderização de aplicações frontend. Manipulação de DOM através de um virtual DOM com uma ótima DX.
+ 4. [Typescript](https://www.typescriptlang.org/): super-set de javascript, uma linguagem de programação fortemente tipada que é construída sobre o Javascript, complementa a linguagem para introduzir tipagem estática, segurança no desenvolvimento e uma intellisense mais descritiva.
+ 5. [Jest](https://jestjs.io/pt-BR/): framework de teste Javascript amplatamente utilizado no mercado.
+ 6. [Formik](https://formik.org/): biblioteca de validação de formulário. Impede que o usuário manipule dados inválidos para a API, além de trazer um feedback interessante ao usuário no preenchimento do formulário.
+ 7. [Docker](https://www.docker.com/): utilizar containers garante que o ambiente em que a aplicação é executada é isolado e facilmente replicado. 
+ 8. [Chakra-UI](https://chakra-ui.com/): framework de CSS com componentes visuais já prontos para o uso, agilizando o desenvolvimento.
 
 ## Variáveis de Ambiente
 Por questões de segurança, não é recomendado compartilhar os segredos dentro do código, nem inserir o arquivo `.env` dentro do git. Porém, para fins de facilitar o clone do projeto, o arquivo `.env` foi compartilhado com esse repositório.

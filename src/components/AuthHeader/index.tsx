@@ -12,7 +12,6 @@ import { BrandLogo } from "../BrandLogo";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store";
 import { UserRole, logOut, login } from "../../store/slices/auth-slice";
-import { useState } from "react";
 import { DateUtil } from "../../utils/date-util";
 import { ErrorLogger } from "../../services/error-logger";
 import { jwtDecode } from "jwt-decode";
@@ -21,7 +20,6 @@ import { useRouter } from "next/router";
 import { AuthCookieService } from "../../services/auth-cookie-service";
 import { Formik, Field, Form, FormikHelpers } from "formik";
 import { isValidEmail } from "@brazilian-utils/brazilian-utils";
-import { isValidPassword } from "../../utils/password-util";
 import { findMessage } from "../../utils/request-error-handler";
 
 export interface JwtPayload {

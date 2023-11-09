@@ -2,7 +2,6 @@ import { AuthHeader } from "../../components/AuthHeader";
 import Head from "next/head";
 import { Box, Flex, Image, Text, Select, Button } from "@chakra-ui/react";
 import { DateUtil } from "../../utils/date-util";
-import { useRouter } from "next/router";
 import { useGetMovieByIdFetcher } from "../../hooks/use-get-movie-by-id-fetcher";
 import { useGetMovieVoteAverageFetcher } from "../../hooks/use-get-movie-vote-average-fetcher";
 import { useState } from "react";

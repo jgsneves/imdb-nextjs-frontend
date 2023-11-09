@@ -125,6 +125,7 @@ export const CreateMovie = () => {
                     as={Input}
                     id="name"
                     name="name"
+                    data-testid="name"
                     disabled={isSubmitting}
                     validate={validateNameInput}
                   />
@@ -141,6 +142,7 @@ export const CreateMovie = () => {
                     as={Input}
                     id="releaseDate"
                     name="releaseDate"
+                    data-testid="releaseDate"
                     type="date"
                     disabled={isSubmitting}
                     validate={validateReleaseDateInput}
@@ -156,6 +158,7 @@ export const CreateMovie = () => {
                     as={Input}
                     id="genre"
                     name="genre"
+                    data-testid="genre"
                     disabled={isSubmitting}
                     validate={validateGenreInput}
                   />
@@ -172,6 +175,7 @@ export const CreateMovie = () => {
                     as={Input}
                     id="directorName"
                     name="directorName"
+                    data-testid="directorName"
                     disabled={isSubmitting}
                     validate={validateDirectorNameInput}
                   />
@@ -186,6 +190,7 @@ export const CreateMovie = () => {
                     as={Input}
                     id="actors"
                     name="actors"
+                    data-testid="actors"
                     disabled={isSubmitting}
                     validate={validateActorsInput}
                   />
